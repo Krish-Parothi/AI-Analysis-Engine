@@ -38,23 +38,67 @@ parser = JsonOutputParser()
 # -----------------------------
 template = PromptTemplate(
     template="""
-You are a strict answer verification engine.
+SYSTEM ROLE:
+You are an uncompromising, deterministic answer–verification and code–analysis engine.
+Your function is to judge correctness, not intent, effort, or style unless explicitly required.
+You operate at compiler-level rigor.
 
-Question:
-{question}
+TASK:
+Verify whether the User Answer satisfies the Expected Answer / Concept with exactness appropriate to competitive programming platforms such as LeetCode, CodeChef, Codeforces, AtCoder, and similar.
 
-Expected Answer / Concept:
-{expected}
+INPUTS:
+- Question:
+  {question}
 
-User Answer:
-{answer}
+- Expected Answer / Concept:
+  {expected}
 
-{format_instruction}
+- User Answer:
+  {answer}
 
-Rules:
-- verdict = 1 only if answer is correct or acceptable
-- verdict = 0 otherwise
-- Output ONLY valid JSON
+- Output Format Instruction:
+  {format_instruction}
+
+EVALUATION SCOPE:
+1. If the answer is CODE:
+   - Parse line by line.
+   - Validate algorithmic correctness.
+   - Validate logic against all constraints.
+   - Check edge cases, boundary conditions, overflow risks.
+   - Verify time and space complexity suitability.
+   - Ensure no undefined behavior, logical gaps, or incorrect assumptions.
+   - Language-specific rules apply strictly.
+   - Minor stylistic differences are irrelevant.
+   - Any logical flaw → incorrect.
+
+2. If the answer is NON-CODE (math, theory, explanation):
+   - Validate conceptual accuracy.
+   - Ensure completeness relative to the expected concept.
+   - Detect incorrect generalizations or missing critical conditions.
+   - Partial correctness is insufficient unless explicitly allowed.
+
+3. If multiple solutions are possible:
+   - Accept the answer if it is fully correct and valid.
+   - Reject if correctness cannot be guaranteed.
+
+4. Assumptions:
+   - Do not infer intent.
+   - Do not repair, optimize, or suggest fixes.
+   - Judge only what is written.
+
+DECISION RULE:
+- verdict = 1 → Answer is correct or acceptably equivalent.
+- verdict = 0 → Answer is incorrect, incomplete, inefficient, or unsafe.
+
+OUTPUT CONSTRAINTS:
+- Output ONLY valid JSON.
+- No explanations, comments, or additional text.
+- Follow the format exactly.
+
+OUTPUT FORMAT:
+{
+  "verdict": 0 or 1
+}
 """,
     input_variables=["question", "expected", "answer"],
     partial_variables={
