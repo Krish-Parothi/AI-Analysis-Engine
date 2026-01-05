@@ -1,5 +1,3 @@
-# app.py
-
 from fastapi import FastAPI
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -9,96 +7,85 @@ from langchain_groq import ChatGroq
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 
-# -----------------------------
-# ENV
-# -----------------------------
+
 load_dotenv()
 
-# -----------------------------
-# APP
-# -----------------------------
 app = FastAPI(title="LLM Answer Verifier")
 
-# -----------------------------
-# MODEL
-# -----------------------------
 model = ChatGroq(
     model="openai/gpt-oss-120b",
     api_key=os.getenv("GROQ_API_KEY"),
     temperature=0
 )
 
-# -----------------------------
-# PARSER
-# -----------------------------
+
 parser = JsonOutputParser()
 
-# -----------------------------
-# PROMPT
-# -----------------------------
+
 template = PromptTemplate(
-template = """
-SYSTEM ROLE:
-You are an uncompromising, deterministic answer–verification and code–analysis engine.
-Your function is to judge correctness, not intent, effort, or style unless explicitly required.
-You operate at compiler-level rigor.
+    template = """
 
-TASK:
-Verify whether the User Answer satisfies the Expected Answer / Concept with exactness appropriate to competitive programming platforms such as LeetCode, CodeChef, Codeforces, AtCoder, and similar.
+    SYSTEM ROLE:
+    You are an uncompromising, deterministic answer–verification and code–analysis engine.
+    Your function is to judge correctness, not intent, effort, or style unless explicitly required.
+    You operate at compiler-level rigor.
 
-INPUTS:
-- Question:
-  {question}
+    TASK:
+    Verify whether the User Answer satisfies the Expected Answer / Concept with exactness appropriate to competitive programming platforms such as LeetCode, CodeChef, Codeforces, AtCoder, and similar.
 
-- Expected Answer / Concept:
-  {expected}
+    INPUTS:
+    - Question:
+      {question}
 
-- User Answer:
-  {answer}
+    - Expected Answer / Concept:
+      {expected}
 
-- Output Format Instruction:
-  {format_instruction}
+    - User Answer:
+      {answer}
 
-EVALUATION SCOPE:
-1. If the answer is CODE:
-   - Parse line by line.
-   - Validate algorithmic correctness.
-   - Validate logic against all constraints.
-   - Check edge cases, boundary conditions, overflow risks.
-   - Verify time and space complexity suitability.
-   - Ensure no undefined behavior, logical gaps, or incorrect assumptions.
-   - Language-specific rules apply strictly.
-   - Minor stylistic differences are irrelevant.
-   - Any logical flaw → incorrect.
+    - Output Format Instruction:
+      {format_instruction}
 
-2. If the answer is NON-CODE (math, theory, explanation):
-   - Validate conceptual accuracy.
-   - Ensure completeness relative to the expected concept.
-   - Detect incorrect generalizations or missing critical conditions.
-   - Partial correctness is insufficient unless explicitly allowed.
+    EVALUATION SCOPE:
+    1. If the answer is CODE:
+      - Parse line by line.
+      - Validate algorithmic correctness.
+      - Validate logic against all constraints.
+      - Check edge cases, boundary conditions, overflow risks.
+      - Verify time and space complexity suitability.
+      - Ensure no undefined behavior, logical gaps, or incorrect assumptions.
+      - Language-specific rules apply strictly.
+      - Minor stylistic differences are irrelevant.
+      - Any logical flaw → incorrect.
 
-3. If multiple solutions are possible:
-   - Accept the answer if it is fully correct and valid.
-   - Reject if correctness cannot be guaranteed.
+    2. If the answer is NON-CODE (math, theory, explanation):
+      - Validate conceptual accuracy.
+      - Ensure completeness relative to the expected concept.
+      - Detect incorrect generalizations or missing critical conditions.
+      - Partial correctness is insufficient unless explicitly allowed.
 
-4. Assumptions:
-   - Do not infer intent.
-   - Do not repair, optimize, or suggest fixes.
-   - Judge only what is written.
+    3. If multiple solutions are possible:
+      - Accept the answer if it is fully correct and valid.
+      - Reject if correctness cannot be guaranteed.
 
-DECISION RULE:
-- verdict = 1 → Answer is correct or acceptably equivalent.
-- verdict = 0 → Answer is incorrect, incomplete, inefficient, or unsafe.
+    4. Assumptions:
+      - Do not infer intent.
+      - Do not repair, optimize, or suggest fixes.
+      - Judge only what is written.
 
-OUTPUT CONSTRAINTS:
-- Output ONLY valid JSON.
-- No explanations, comments, or additional text.
-- Follow the format exactly.
+    DECISION RULE:
+    - verdict = 1 → Answer is correct or acceptably equivalent.
+    - verdict = 0 → Answer is incorrect, incomplete, inefficient, or unsafe.
 
-OUTPUT FORMAT:
-{{
-  "verdict": 0 or 1
-}}
+    OUTPUT CONSTRAINTS:
+    - Output ONLY valid JSON.
+    - No explanations, comments, or additional text.
+    - Follow the format exactly.
+
+    OUTPUT FORMAT:
+    {{
+      "verdict": 0 or 1
+    }}
 """
 ,
     input_variables=["question", "expected", "answer"],
@@ -109,9 +96,7 @@ OUTPUT FORMAT:
 
 chain = template | model | parser
 
-# -----------------------------
-# SCHEMA
-# -----------------------------
+#Schema
 class VerifyRequest(BaseModel):
     question: str
     expected: str
@@ -120,9 +105,9 @@ class VerifyRequest(BaseModel):
 class VerifyResponse(BaseModel):
     verdict: int
 
-# -----------------------------
-# ROUTE
-# -----------------------------
+
+
+
 @app.post("/verify", response_model=VerifyResponse)
 async def verify_answer(payload: VerifyRequest):
     result = await chain.ainvoke({
@@ -133,7 +118,5 @@ async def verify_answer(payload: VerifyRequest):
 
     return {"verdict": int(result["verdict"])}
 
-# -----------------------------
-# RUN
-# -----------------------------
+#Run this command
 # uvicorn app:app --host 0.0.0.0 --port 8000
