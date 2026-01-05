@@ -37,7 +37,7 @@ parser = JsonOutputParser()
 # PROMPT
 # -----------------------------
 template = PromptTemplate(
-    template="""
+template = """
 SYSTEM ROLE:
 You are an uncompromising, deterministic answer–verification and code–analysis engine.
 Your function is to judge correctness, not intent, effort, or style unless explicitly required.
@@ -96,10 +96,11 @@ OUTPUT CONSTRAINTS:
 - Follow the format exactly.
 
 OUTPUT FORMAT:
-{
+{{
   "verdict": 0 or 1
-}
-""",
+}}
+"""
+,
     input_variables=["question", "expected", "answer"],
     partial_variables={
         "format_instruction": parser.get_format_instructions()
