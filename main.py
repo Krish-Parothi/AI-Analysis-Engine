@@ -120,3 +120,5 @@ async def verify_answer(payload: VerifyRequest):
 
 #Run this command
 # uvicorn app:app --host 0.0.0.0 --port 8000
+
+# chain.get_graph().print_ascii()
