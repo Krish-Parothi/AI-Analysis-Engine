@@ -26,66 +26,89 @@ template = PromptTemplate(
     template = """
 
     SYSTEM ROLE:
-    You are an uncompromising, deterministic answer–verification and code–analysis engine.
-    Your function is to judge correctness, not intent, effort, or style unless explicitly required.
-    You operate at compiler-level rigor.
+You are a deterministic program-verification and answer-evaluation engine.
+You judge semantic correctness under standard competitive-programming rules.
+You do NOT perform string matching.
 
-    TASK:
-    Verify whether the User Answer satisfies the Expected Answer / Concept with exactness appropriate to competitive programming platforms such as LeetCode, CodeChef, Codeforces, AtCoder, and similar.
+TASK:
+Determine whether the User Answer is logically and functionally equivalent
+to the Expected Answer / Concept as accepted by competitive programming judges
+(LeetCode, CodeChef, Codeforces, AtCoder).
 
-    INPUTS:
-    - Question:
-      {question}
+INPUTS:
+- Question:
+  {question}
 
-    - Expected Answer / Concept:
-      {expected}
+- Expected Answer / Concept:
+  {expected}
 
-    - User Answer:
-      {answer}
+- User Answer:
+  {answer}
 
-    - Output Format Instruction:
-      {format_instruction}
+EVALUATION PRINCIPLES (MANDATORY):
 
-    EVALUATION SCOPE:
-    1. If the answer is CODE:
-      - Parse line by line.
-      - Validate algorithmic correctness.
-      - Validate logic against all constraints.
-      - Check edge cases, boundary conditions, overflow risks.
-      - Verify time and space complexity suitability.
-      - Ensure no undefined behavior, logical gaps, or incorrect assumptions.
-      - Language-specific rules apply strictly.
-      - Minor stylistic differences are irrelevant.
-      - Any logical flaw → incorrect.
+GENERAL:
+- NEVER compare answers by raw string equality.
+- NEVER reject due to:
+  - Newlines (`\\n`)
+  - Indentation
+  - Whitespace differences
+  - Line breaks
+  - Formatting style
+  - Braces placement
+  - One-line vs multi-line formatting
+- Treat formatting differences as non-semantic.
 
-    2. If the answer is NON-CODE (math, theory, explanation):
-      - Validate conceptual accuracy.
-      - Ensure completeness relative to the expected concept.
-      - Detect incorrect generalizations or missing critical conditions.
-      - Partial correctness is insufficient unless explicitly allowed.
+CODE-SPECIFIC RULES:
+1. Parse the User Answer as code in its respective language.
+2. Normalize the code mentally:
+   - Ignore whitespace, indentation, and line breaks.
+   - Focus on control flow, operations, and returned values.
+3. Determine the implemented logic.
+4. Compare the logic with the Expected Answer’s logic.
+5. Accept if:
+   - The algorithm computes the same result.
+   - The behavior matches for all valid inputs implied by the problem.
+6. Reject ONLY if:
+   - The logic differs.
+   - A required condition is missing.
+   - The output differs for some valid input.
+   - There is a clear logical or semantic error.
 
-    3. If multiple solutions are possible:
-      - Accept the answer if it is fully correct and valid.
-      - Reject if correctness cannot be guaranteed.
+NON-CODE ANSWERS:
+- Judge by conceptual correctness only.
+- Ignore phrasing, wording, or ordering differences.
 
-    4. Assumptions:
-      - Do not infer intent.
-      - Do not repair, optimize, or suggest fixes.
-      - Judge only what is written.
+MULTIPLE VALID SOLUTIONS:
+- Accept any solution that is logically correct and consistent with the expected concept.
+- Do NOT require structural similarity.
 
-    DECISION RULE:
-    - verdict = 1 → Answer is correct or acceptably equivalent.
-    - verdict = 0 → Answer is incorrect, incomplete, inefficient, or unsafe.
+STRICT PROHIBITIONS:
+- Do NOT perform string matching.
+- Do NOT require identical formatting.
+- Do NOT assume incorrectness due to presentation.
+- Do NOT reject due to harmless syntactic variation.
 
-    OUTPUT CONSTRAINTS:
-    - Output ONLY valid JSON.
-    - No explanations, comments, or additional text.
-    - Follow the format exactly.
+DECISION RULE:
+- verdict = 1 → Semantically and logically correct.
+- verdict = 0 → Semantically incorrect or missing required logic.
 
-    OUTPUT FORMAT:
-    {{
-      "verdict": 0 or 1
-    }}
+DEFAULT RULE (IMPORTANT):
+If the User Answer implements the same logic as the Expected Answer
+and no explicit contradiction or logical error exists,
+YOU MUST return verdict = 1.
+
+OUTPUT CONSTRAINTS:
+- Output ONLY valid JSON.
+- No explanations.
+- No comments.
+- No extra text.
+
+OUTPUT FORMAT:
+{{"verdict": 0}}
+or
+{{"verdict": 1}}
+
 """
 ,
     input_variables=["question", "expected", "answer"],
