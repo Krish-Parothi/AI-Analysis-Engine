@@ -15,7 +15,7 @@ app = FastAPI(title="LLM Answer Verifier")
 model = ChatGroq(
     model="openai/gpt-oss-120b",
     api_key=os.getenv("GROQ_API_KEY"),
-    temperature=0
+    temperature=0.8
 )
 
 
