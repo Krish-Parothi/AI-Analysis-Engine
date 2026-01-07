@@ -14,5 +14,6 @@ dependencies = [
     "langchain-core>=1.2.6",
     "langchain-groq>=1.1.1",
     "pydantic>=2.12.5",
+    "pydantic-core>=2.41.5",
     "uvicorn>=0.40.0",
 ]
