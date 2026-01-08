@@ -141,7 +141,7 @@ async def verify_answer(payload: VerifyRequest):
 
     return {"verdict": int(result["verdict"])}
 
-@app.route("/")
+@app.get("/")
 async def hello():
     return "API is Working"
 
