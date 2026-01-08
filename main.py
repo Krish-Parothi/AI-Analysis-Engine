@@ -141,6 +141,10 @@ async def verify_answer(payload: VerifyRequest):
 
     return {"verdict": int(result["verdict"])}
 
+@app.route("/")
+async def hello():
+    return "API is Working"
+
 #Run this command
 # uvicorn app:app --host 0.0.0.0 --port 8000
 
