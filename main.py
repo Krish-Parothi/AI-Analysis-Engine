@@ -141,9 +141,9 @@ OUTPUT CONSTRAINTS:
 - No extra text.
 
 OUTPUT FORMAT:
-{"score": 1}
+{{"score": 1}}
 to
-{"score": 10}
+{{"score": 10}}
 """
 ,
     input_variables=["question", "expected", "answer"],
