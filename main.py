@@ -141,9 +141,9 @@ OUTPUT CONSTRAINTS:
 - No extra text.
 
 OUTPUT FORMAT:
-{{"score": 1}}
+{{"verdict": 1}}
 to
-{{"score": 10}}
+{{"verdict": 10}}
 """
 ,
     input_variables=["question", "expected", "answer"],
@@ -161,7 +161,7 @@ class VerifyRequest(BaseModel):
     answer: str
 
 class VerifyResponse(BaseModel):
-    score: int
+    verdict: int
 
 
 
@@ -174,7 +174,7 @@ async def verify_answer(payload: VerifyRequest):
         "answer": payload.answer
     })
 
-    return {"verdict": int(result["score"])}
+    return {"verdict": int(result["verdict"])}
 
 @app.get("/")
 async def hello():
