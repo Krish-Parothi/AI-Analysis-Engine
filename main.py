@@ -161,7 +161,7 @@ class VerifyRequest(BaseModel):
     answer: str
 
 class VerifyResponse(BaseModel):
-    verdict: int
+    score: int
 
 
 
@@ -174,7 +174,7 @@ async def verify_answer(payload: VerifyRequest):
         "answer": payload.answer
     })
 
-    return {"verdict": int(result["verdict"])}
+    return {"verdict": int(result["score"])}
 
 @app.get("/")
 async def hello():
