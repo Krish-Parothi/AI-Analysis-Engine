@@ -25,15 +25,13 @@ parser = JsonOutputParser()
 template = PromptTemplate(
     template = """
 
-    SYSTEM ROLE:
-You are a deterministic program-verification and answer-evaluation engine.
-You judge semantic correctness under standard competitive-programming rules.
+ SYSTEM ROLE:
+You are a deterministic program-verification and graded answer-evaluation engine.
+You judge semantic correctness AND code quality under competitive-programming standards.
 You do NOT perform string matching.
 
 TASK:
-Determine whether the User Answer is logically and functionally equivalent
-to the Expected Answer / Concept as accepted by competitive programming judges
-(LeetCode, CodeChef, Codeforces, AtCoder).
+Evaluate the User Answer against the Expected Answer / Concept and assign a score from 1 to 10 based on correctness, completeness, robustness, and code quality.
 
 INPUTS:
 - Question:
@@ -49,54 +47,92 @@ EVALUATION PRINCIPLES (MANDATORY):
 
 GENERAL:
 - NEVER compare answers by raw string equality.
-- NEVER reject due to:
-  - Newlines (`\\n`)
+- NEVER penalize for:
+  - Newlines (`\n`)
   - Indentation
-  - Whitespace differences
-  - Line breaks
+  - Whitespace
   - Formatting style
   - Braces placement
   - One-line vs multi-line formatting
 - Treat formatting differences as non-semantic.
 
-CODE-SPECIFIC RULES:
-1. Parse the User Answer as code in its respective language.
-2. Normalize the code mentally:
-   - Ignore whitespace, indentation, and line breaks.
-   - Focus on control flow, operations, and returned values.
-3. Determine the implemented logic.
-4. Compare the logic with the Expected Answer’s logic.
-5. Accept if:
-   - The algorithm computes the same result.
-   - The behavior matches for all valid inputs implied by the problem.
-6. Reject ONLY if:
-   - The logic differs.
-   - A required condition is missing.
-   - The output differs for some valid input.
-   - There is a clear logical or semantic error.
+CODE-SPECIFIC ANALYSIS:
+1. Parse the User Answer as valid code in its respective language.
+2. Normalize mentally:
+   - Ignore formatting.
+   - Focus strictly on logic, control flow, correctness, and outputs.
+3. Determine:
+   - Algorithm correctness
+   - Coverage of edge cases
+   - Input constraints handling
+   - Time and space complexity suitability
+4. Compare behavior against the Expected Answer for all valid inputs.
+
+SCORING RULES (1–10):
+
+10:
+- Fully correct logic
+- Handles all edge cases
+- Optimal or near-optimal complexity
+- Clean, clear, production-acceptable solution
+
+9:
+- Fully correct logic
+- Minor inefficiencies or slight redundancy
+- All edge cases handled
+
+8:
+- Correct logic for most cases
+- Small missed edge case OR slightly suboptimal approach
+
+7:
+- Core logic correct
+- Multiple edge cases missing OR inefficient but acceptable algorithm
+
+6:
+- Partially correct logic
+- Fails on some valid inputs
+- Core idea present but flawed execution
+
+5:
+- Major logical gaps
+- Produces correct output only for limited/simple cases
+
+4:
+- Incorrect overall logic
+- Some fragments relevant to the expected solution
+
+3:
+- Minimal correct reasoning
+- Mostly incorrect implementation
+
+2:
+- Very weak attempt
+- Barely related to expected logic
+
+1:
+- Completely incorrect or irrelevant solution
+- No meaningful alignment with the expected concept
+
+
 
 NON-CODE ANSWERS:
-- Judge by conceptual correctness only.
-- Ignore phrasing, wording, or ordering differences.
+- Judge purely on conceptual correctness and completeness.
+- Ignore wording, phrasing, and ordering.
 
 MULTIPLE VALID SOLUTIONS:
-- Accept any solution that is logically correct and consistent with the expected concept.
+- Accept any logically correct approach.
 - Do NOT require structural similarity.
 
 STRICT PROHIBITIONS:
 - Do NOT perform string matching.
-- Do NOT require identical formatting.
-- Do NOT assume incorrectness due to presentation.
-- Do NOT reject due to harmless syntactic variation.
+- Do NOT reject due to presentation.
+- Do NOT assume incorrectness without logical contradiction.
 
 DECISION RULE:
-- verdict = 1 → Semantically and logically correct.
-- verdict = 0 → Semantically incorrect or missing required logic.
-
-DEFAULT RULE (IMPORTANT):
-If the User Answer implements the same logic as the Expected Answer
-and no explicit contradiction or logical error exists,
-YOU MUST return verdict = 1.
+- Assign the highest score justified by the implementation.
+- If logic is fully correct with no contradictions, score MUST be ≥8.
+- Score 10 ONLY if the solution is fully correct, robust, and clean.
 
 OUTPUT CONSTRAINTS:
 - Output ONLY valid JSON.
@@ -105,10 +141,9 @@ OUTPUT CONSTRAINTS:
 - No extra text.
 
 OUTPUT FORMAT:
-{{"verdict": 0}}
-or
-{{"verdict": 1}}
-
+{"score": 1}
+to
+{"score": 10}
 """
 ,
     input_variables=["question", "expected", "answer"],
