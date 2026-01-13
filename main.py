@@ -12,7 +12,7 @@ load_dotenv()
 app = FastAPI(title="LLM Answer Verifier")
 
 model = ChatGroq(
-    model="llama3-8b-8192",  # Faster, smaller model
+    model="llama3-70b-8192",  # Better balance: 70B parameters for accuracy, still fast on Groq
     api_key=os.getenv("GROQ_API_KEY"),
     temperature=0.1  # Lower temperature for more deterministic responses
 )
