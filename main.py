@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
+import app
 from langchain_groq import ChatGroq
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
@@ -12,9 +13,9 @@ load_dotenv()
 app = FastAPI(title="LLM Answer Verifier")
 
 model = ChatGroq(
-    model="llama3-70b-8192",  # Better balance: 70B parameters for accuracy, still fast on Groq
+    model="openai/gpt-oss-120b",
     api_key=os.getenv("GROQ_API_KEY"),
-    temperature=0.1  # Lower temperature for more deterministic responses
+    temperature=0.8
 )
 
 
